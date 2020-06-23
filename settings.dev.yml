@@ -1,0 +1,52 @@
+
+# https://github.com/nodejs/docker-node/blob/master/README.md#how-to-use-this-image
+
+version: "3"
+services:
+
+services:
+  teste.mongo:
+    container_name: teste.mongo
+    hostname: mongo
+    image: mongo:4.0-xenial
+    expose:
+    - 27017
+    ports:
+      - 27017:27017
+    restart: always
+
+  teste.backoffice:
+    container_name: teste.backoffice
+    image: trion/ng-cli
+    working_dir: /home/node/app
+    links:
+      - teste.mongo
+    depends_on:
+      - teste.mongo
+    environment:
+      PORT: 4200
+      NODE_ENV: development
+    volumes:
+      - ./src/backoffice:/home/node/app
+    expose:
+      - "4200"
+    ports:
+      - 4200:4200
+    command: bash -c 'npm install && npm run start'
+
+  teste.backend:
+    container_name: teste.backend
+    image: node:10
+    user: "node"
+    working_dir: /home/node/app
+    links:
+      - teste.mongo
+    depends_on:
+      - teste.mongo
+    volumes:
+      - ./src/backend:/home/node/app
+    expose:
+      - "8000"
+    ports:
+      - 8000:8000
+    command: bash -c 'npm install && npm run start'
